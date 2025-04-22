@@ -1,0 +1,7 @@
+flwr
+torch
+torchvision
+numpy
+web3
+solcx
+pickle5
