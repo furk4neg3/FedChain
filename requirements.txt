@@ -3,7 +3,7 @@ torch
 torchvision
 numpy
 web3
-solcx
+py-solc-x
 pickle5
 dotenv
 os
