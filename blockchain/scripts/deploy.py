@@ -1,6 +1,11 @@
 from web3 import Web3
 from solcx import compile_standard
 import json
+from solcx import install_solc, set_solc_version
+
+# Make sure the correct version is installed
+install_solc("0.8.0")  # Or your required version
+set_solc_version("0.8.0")
 
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 w3.eth.default_account = w3.eth.accounts[0]

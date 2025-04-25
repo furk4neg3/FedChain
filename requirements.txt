@@ -5,3 +5,5 @@ numpy
 web3
 solcx
 pickle5
+dotenv
+os
