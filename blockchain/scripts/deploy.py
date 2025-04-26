@@ -1,32 +1,44 @@
+# /app/blockchain/scripts/deploy.py
+
 from web3 import Web3
-from solcx import compile_standard
-import json
-from solcx import install_solc, set_solc_version
+from solcx import compile_standard, install_solc
+import json, pathlib
 
-# Make sure the correct version is installed
-install_solc("0.8.0")  # Or your required version
-set_solc_version("0.8.0")
+install_solc("0.8.0")
 
-w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
+w3 = Web3(Web3.HTTPProvider("http://ganache:8545"))
+assert w3.is_connected(), "Cannot reach Ganache"
+
+# Use the first Ganache account both as deployer and server identity
 w3.eth.default_account = w3.eth.accounts[0]
+account = w3.eth.default_account
 
-with open("../contracts/FederatedLearning.sol", "r") as file:
-    contract_source = file.read()
-
-compiled_sol = compile_standard({
+# Read & compile
+ROOT = pathlib.Path("/app/blockchain")
+sol = (ROOT / "contracts" / "FederatedLearning.sol").read_text()
+compiled = compile_standard({
     "language": "Solidity",
-    "sources": {"FederatedLearning.sol": {"content": contract_source}},
-    "settings": {"outputSelection": {"*": {"*": ["abi", "evm.bytecode"]}}}
+    "sources": {"FederatedLearning.sol": {"content": sol}},
+    "settings": {"outputSelection": {"*": {"*": ["abi","evm.bytecode"]}}},
 })
+abi      = compiled["contracts"]["FederatedLearning.sol"]["FederatedLearning"]["abi"]
+bytecode = compiled["contracts"]["FederatedLearning.sol"]["FederatedLearning"]["evm"]["bytecode"]["object"]
 
-bytecode = compiled_sol['contracts']['FederatedLearning.sol']['FederatedLearning']['evm']['bytecode']['object']
-abi = compiled_sol['contracts']['FederatedLearning.sol']['FederatedLearning']['abi']
+# 1️⃣ Deploy
+factory = w3.eth.contract(abi=abi, bytecode=bytecode)
+tx_hash = factory.constructor().transact()
+receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+deployed_address = receipt.contractAddress
+print("✓ Contract deployed at", deployed_address)
 
-contract = w3.eth.contract(abi=abi, bytecode=bytecode)
-tx_hash = contract.constructor().transact()
-tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+# 2️⃣ Re-bind to the live contract
+contract = w3.eth.contract(address=deployed_address, abi=abi)
 
-print(f"Contract deployed at address: {tx_receipt.contractAddress}")
+# 3️⃣ Register this node
+tx_reg = contract.functions.registerNode(account).transact({"from": account})
+w3.eth.wait_for_transaction_receipt(tx_reg)
+print("✓ Server node registered:", account)
 
-with open('contract_info.json', 'w') as file:
-    json.dump({"abi": abi, "address": tx_receipt.contractAddress}, file)
+# 4️⃣ Write out the info for server to pick up
+info = {"abi": abi, "address": deployed_address}
+(ROOT / "scripts" / "contract_info.json").write_text(json.dumps(info))

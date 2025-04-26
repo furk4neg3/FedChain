@@ -1,52 +1,64 @@
-version: "3.9"
+version: "3"
 
 services:
+  ganache:
+    image: trufflesuite/ganache-cli
+    ports:
+      - "8545:8545"
+    networks:
+      - fl_network
+
   server:
     build: .
-    command: python server/server.py
+    entrypoint: ["sh", "/app/server/entrypoint.sh"]
     ports:
       - "8080:8080"
     environment:
-      - SERVER_IP=0.0.0.0
+      - NUM_CLIENTS=3
     depends_on:
       - ganache
-
-  client0:
-    build: .
-    command: python client/client.py
-    environment:
-      - CLIENT_ID=0
-      - TOTAL_CLIENTS=5
+    networks:
+      - fl_network
 
   client1:
     build: .
     command: python client/client.py
     environment:
-      - CLIENT_ID=1
-      - TOTAL_CLIENTS=5
+      - SERVER_IP=server
+      - SERVER_PORT=8080
+      - CLIENT_ID=0
+      - NUM_CLIENTS=3
+    depends_on:
+      - server
+    networks:
+      - fl_network
 
   client2:
     build: .
     command: python client/client.py
     environment:
-      - CLIENT_ID=2
-      - TOTAL_CLIENTS=5
+      - SERVER_IP=server
+      - SERVER_PORT=8080
+      - CLIENT_ID=1
+      - NUM_CLIENTS=3
+    depends_on:
+      - server
+    networks:
+      - fl_network
 
   client3:
     build: .
     command: python client/client.py
     environment:
-      - CLIENT_ID=3
-      - TOTAL_CLIENTS=5
+      - SERVER_IP=server
+      - SERVER_PORT=8080
+      - CLIENT_ID=2
+      - NUM_CLIENTS=3
+    depends_on:
+      - server
+    networks:
+      - fl_network
 
-  client4:
-    build: .
-    command: python client/client.py
-    environment:
-      - CLIENT_ID=4
-      - TOTAL_CLIENTS=5
-
-  ganache:
-    image: trufflesuite/ganache
-    ports:
-      - "8545:8545"
+networks:
+  fl_network:
+    driver: bridge

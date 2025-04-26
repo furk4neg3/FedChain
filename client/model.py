@@ -1,23 +1,28 @@
-# client.py
-import flwr as fl
-from model import Net, client_update, train_loader
+# client/model.py
 
-class MNISTClient(fl.client.NumPyClient):
+import torch
+import torch.nn as nn
+
+class Net(nn.Module):
+    """Same model definition for clients."""
     def __init__(self):
-        self.model = Net()
+        super(Net, self).__init__()
+        self.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(28 * 28, 128),
+            nn.ReLU(),
+            nn.Linear(128, 10)
+        )
 
-    def get_parameters(self, config):
-        return [val.cpu().numpy() for val in self.model.parameters()]
+    def forward(self, x):
+        return self.fc(x)
 
-    def fit(self, parameters, config):
-        for param, new_param in zip(self.model.parameters(), parameters):
-            param.data = torch.tensor(new_param)
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
-        client_update(self.model, optimizer, train_loader, epochs=2)
-        return self.get_parameters(config), len(train_loader.dataset), {}
-
-    def evaluate(self, parameters, config):
-        # Optional evaluation method
-        pass
-
-fl.client.start_numpy_client(server_address="192.168.X.X:8080", client=MNISTClient())
+def client_update(model, optimizer, train_loader, epochs=1):
+    """Train `model` on `train_loader` for `epochs` epochs."""
+    model.train()
+    for _ in range(epochs):
+        for data, target in train_loader:
+            optimizer.zero_grad()
+            loss = nn.CrossEntropyLoss()(model(data), target)
+            loss.backward()
+            optimizer.step()
