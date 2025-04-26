@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 import os
-import warnings
-
-# Silence deprecation warnings from Flower/WebSockets
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import pickle
 import torch
