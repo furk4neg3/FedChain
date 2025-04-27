@@ -4,4 +4,4 @@ torchvision
 numpy
 web3
 py-solc-x
-dotenv
+python-dotenv

@@ -65,28 +65,37 @@ class MNISTClient(fl.client.NumPyClient):
         self.test_loader = test_loader
         self.device = device
         self.model = Net().to(self.device)
+        # ── Track rounds locally ──────────────────
+        self.fit_round = 0
+        self.eval_round = 0
 
     def get_parameters(self, config):
         # Detach before converting to numpy
         return [p.detach().cpu().numpy() for p in self.model.parameters()]
 
     def fit(self, parameters, config):
-        rnd = config.get("server_round", config.get("round", 0))
         # Load global parameters
         for p, newp in zip(self.model.parameters(), parameters):
             p.data = torch.from_numpy(newp).to(self.device)
+        # Train
         train(self.model, self.train_loader, self.device)
+        # Evaluate on own test set
         loss, acc = test(self.model, self.test_loader, self.device)
-        print(f"[Client {self.cid}] Fit  Round {rnd} → test-accuracy: {acc*100:.2f}%")
+        # ── Print with correct round ──────────────────
+        self.fit_round += 1
+        print(f"[Client {self.cid}] Fit  Round {self.fit_round} → test-accuracy: {acc * 100:.2f}%")
+        # Return updated parameters
         return self.get_parameters(config), len(self.train_loader.dataset), {"accuracy": acc}
 
     def evaluate(self, parameters, config):
-        rnd = config.get("server_round", config.get("round", 0))
         # Load global parameters
         for p, newp in zip(self.model.parameters(), parameters):
             p.data = torch.from_numpy(newp).to(self.device)
+        # Evaluate on full test set
         loss, acc = test(self.model, self.test_loader, self.device)
-        print(f"[Client {self.cid}] Eval Round {rnd} → test-accuracy: {acc*100:.2f}%")
+        # ── Print with correct round ──────────────────
+        self.eval_round += 1
+        print(f"[Client {self.cid}] Eval Round {self.eval_round} → test-accuracy: {acc * 100:.2f}%")
         return float(loss), len(self.test_loader.dataset), {"accuracy": acc}
 
 
