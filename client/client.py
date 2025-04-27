@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torch import nn
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
+from model import Net
 
 
 # ── Model ───────────────────────────────────────────────────────────────────────
