@@ -62,7 +62,7 @@ class MNISTClient(fl.client.NumPyClient):
         loss, acc = test(self.model, self.test_loader, self.device)
         # ── Print with correct round ──────────────────
         self.fit_round += 1
-        print(f"[Client {self.cid}] Fit  Round {self.fit_round} → test-accuracy: {acc * 100:.2f}%")
+        print(f"[Client {self.cid}] Local Model After Round {self.fit_round} → test-accuracy: {acc * 100:.2f}%")
         # Return updated parameters
         return self.get_parameters(config), len(self.train_loader.dataset), {"accuracy": acc}
 
@@ -74,7 +74,7 @@ class MNISTClient(fl.client.NumPyClient):
         loss, acc = test(self.model, self.test_loader, self.device)
         # ── Print with correct round ──────────────────
         self.eval_round += 1
-        print(f"[Client {self.cid}] Eval Round {self.eval_round} → test-accuracy: {acc * 100:.2f}%")
+        #print(f"[Client {self.cid}] Eval Round {self.eval_round} → test-accuracy: {acc * 100:.2f}%")
         return float(loss), len(self.test_loader.dataset), {"accuracy": acc}
 
 
