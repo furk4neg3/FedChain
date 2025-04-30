@@ -22,40 +22,94 @@ services:
 
   client1:
     build: .
-    command: python client/client.py
+    depends_on:
+      - server
     environment:
       - SERVER_IP=server
       - SERVER_PORT=8080
       - CLIENT_ID=0
       - NUM_CLIENTS=3
-    depends_on:
-      - server
+    command:
+      - sh
+      - -c
+      - |
+        python - << 'EOF'
+        import socket, time, os
+        host = os.environ['SERVER_IP']
+        port = int(os.environ['SERVER_PORT'])
+        while True:
+            try:
+                sock = socket.socket()
+                sock.connect((host, port))
+                sock.close()
+                break
+            except:
+                print(f"⏳ waiting for FL server at {host}:{port}…")
+                time.sleep(1)
+        EOF
+        python client/client.py
     networks:
       - fl_network
 
   client2:
     build: .
-    command: python client/client.py
+    depends_on:
+      - server
     environment:
       - SERVER_IP=server
       - SERVER_PORT=8080
       - CLIENT_ID=1
       - NUM_CLIENTS=3
-    depends_on:
-      - server
+    command:
+      - sh
+      - -c
+      - |
+        python - << 'EOF'
+        import socket, time, os
+        host = os.environ['SERVER_IP']
+        port = int(os.environ['SERVER_PORT'])
+        while True:
+            try:
+                sock = socket.socket()
+                sock.connect((host, port))
+                sock.close()
+                break
+            except:
+                print(f"⏳ waiting for FL server at {host}:{port}…")
+                time.sleep(1)
+        EOF
+        python client/client.py
     networks:
       - fl_network
 
   client3:
     build: .
-    command: python client/client.py
+    depends_on:
+      - server
     environment:
       - SERVER_IP=server
       - SERVER_PORT=8080
       - CLIENT_ID=2
       - NUM_CLIENTS=3
-    depends_on:
-      - server
+    command:
+      - sh
+      - -c
+      - |
+        python - << 'EOF'
+        import socket, time, os
+        host = os.environ['SERVER_IP']
+        port = int(os.environ['SERVER_PORT'])
+        while True:
+            try:
+                sock = socket.socket()
+                sock.connect((host, port))
+                sock.close()
+                break
+            except:
+                print(f"⏳ waiting for FL server at {host}:{port}…")
+                time.sleep(1)
+        EOF
+        python client/client.py
     networks:
       - fl_network
 
