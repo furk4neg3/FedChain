@@ -18,11 +18,14 @@ RUN wget -qO /usr/bin/solc \
 WORKDIR /app
 
 # Copy requirements first (to leverage Docker layer caching)
-COPY requirements.txt .  
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # Copy all application code
 COPY . .
+
+# Remove any trailing CR (\r) from shell scripts so sh handles them correctly
+RUN sed -i 's/\r$//' server/entrypoint.sh
 
 # Make the server entrypoint executable
 RUN chmod +x server/entrypoint.sh
