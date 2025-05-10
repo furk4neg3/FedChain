@@ -19,6 +19,8 @@ services:
       - ganache
     networks:
       - fl_network
+    volumes:
+      - ./logs:/app/logs
 
   client1:
     build: .
