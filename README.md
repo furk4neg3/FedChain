@@ -21,14 +21,16 @@ Simply open the report in your browser:
 
 ```bash
 open logs/report.html
-
+```
 
 ## Linux
 
 ```bash
 xdg-open logs/report.html
+```
 
 ## Windows PowerShell
 
 ```bash
 start .\logs\report.html
+```
