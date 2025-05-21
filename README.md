@@ -34,12 +34,6 @@ Clients train on disjoint MNIST shards, submit hashed model updates via Solidity
    docker-compose up --build
    ```
    - 🚨 **Heads-up:** The first build can take **over 1 hour**, as it builds images *and* runs 3 rounds of local training + global aggregation on MNIST.  
-   - To avoid rebuilding from scratch on your next run:
-     ```bash
-     docker-compose down --remove-orphans
-     docker-compose up --build
-     ```
-
 ---
 
 ## 📊 What’s Happening Under the Hood
